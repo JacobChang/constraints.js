@@ -1,0 +1,34 @@
+{
+  "name": "constraints.js",
+  "version": "0.0.1",
+  "description": "A library to validate constraints on JavaScript Object",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JacobChang/constraints.js.git"
+  },
+  "keywords": [
+    "constraints",
+    "validate"
+  ],
+  "engines": {
+    "node": "0.12.0"
+  },
+  "author": "Jacob Chang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JacobChang/constraints.js/issues"
+  },
+  "homepage": "https://github.com/JacobChang/constraints.js",
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "mocha": "^2.2.1",
+    "should": "^5.2.0"
+  },
+  "dependencies": {
+    "es6-promise": "^2.0.1"
+  }
+}
