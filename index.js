@@ -16,63 +16,46 @@ var checkType = function(definitionName, configuration, constraint) {
     if(typeCheckers[constraint](configuration)) {
       resolve(true);
     } else {
-      reject(new Error('wrong type: expect' + definition.type));
+      reject(new Error('wrong type of ' + definitionName + 
+                       ': expect ' + constraint));
     }
   });
 }
 
-var checkMin = function(definitionName, configuation, constraint) {
-  console.log("check min: ", definitionName, configuration, constraint);
-  if(!util.isNumber(constraint)) {
+var checkRange = function(definitionName, configuration, constraint) {
+  console.log("check range: ", definitionName, configuration, constraint);
+  if(!util.isObject(constraint)) {
     return Promise.reject(new Error("constrainturation of min constraint must be number"));
   }
 
-  if(!util.isString(configuation) && !util.isNumber(configuation)) {
-    return Promise.reject(new Error("configuation must be number or string when apply min constraints"));
+  if(!util.isString(configuration) && !util.isNumber(configuration)) {
+    return Promise.reject(new Error("configuration must be number or string when apply min constraints"));
   }
 
-  var size = util.isString(configuation) ? configuration.length : configuration;
-  if(size >= constraint) {
-    return Promise.resolve(true);
+  var size = util.isString(configuration) ? configuration.length : configuration;
+  if(size < constraint.min) {
+    return Promise.reject(new Error('min size of ' + definitionName + ': ' + constraint.min));
+  } else if(size > constraint.max) {
+    return Promise.reject(new Error('max size of ' + definitionName + ': ' + constraint.max));
   } else {
-    return Promise.reject(new Error("min size: " + constraint));
+    return Promise.resolve(true);
   }
 };
 
-var checkMax = function(definitionName, configuation, constraint) {
-  console.log("check max: ", definitionName, configuration, constraint);
-  if(!util.isNumber(constraint)) {
-    return Promise.reject(new Error("constrainturation of min constraint must be number"));
-  }
-
-  if(!util.isString(configuation) && !util.isNumber(configuation)) {
-    return Promise.rejct(new Error("configuation must be number or string when apply min constraints"));
-  }
-
-  var size = util.isString(configuation) ? configuration.length : configuration;
-  if(size <= constraint) {
-    return Promise.resolve(true);
-  } else {
-    return Promise.reject(new Error("max size: " + constraint));
-  }
-};
-
-var checkProperties = function(definitionName, configuation, constraint) {
+var checkProperties = function(definitionName, configuration, constraint) {
   console.log("check properties: ", definitionName, configuration, constraint);
   if(!util.isObject(constraint)) {
     Promise.reject(new Error("constrainturation of properties constraint must be number"));
   }
 
-  if(!util.isObject(configuation) && !util.isObject(configuation)) {
-    Promise.reject(new Error("configuation must be object or array when apply properties constraints"));
+  if(!util.isObject(configuration) && !util.isObject(configuration)) {
+    Promise.reject(new Error("configuration must be object or array when apply properties constraints"));
   }
 
-  if(util.isObject(configuation)) {
-    return check(configuraton, constraint);
-  } else {
+  if(util.isArray(configuration)) {
     return new Promise(function(resolve, reject) {
-      var promises = configuation.map(function(member) {
-        return check(member, constraint);
+      var promises = configuration.map(function(member, i) {
+        return check(constraint, member);
       });
 
       Promise.all(promises).then(function(results) {
@@ -81,6 +64,8 @@ var checkProperties = function(definitionName, configuation, constraint) {
         reject(results);
       });
     });
+  } else {
+    return check(constraint, configuration);
   }
 };
 
@@ -88,11 +73,8 @@ var constraintCheckers = {
   type: {
     check: checkType,
   },
-  min: {
-    check: checkMin,
-  },
-  max: {
-    check: checkMax,
+  range: {
+    check: checkRange,
   },
   properties: {
     check: checkProperties,
@@ -155,7 +137,8 @@ var check = function(definitions, configurations) {
     });
 
     Promise.all(promises).then(function(results) {
-      var promises = definitionsNames.map(function(definitionName) {
+      console.log('resovle required');
+      var promises = definitionNames.map(function(definitionName) {
         var definition = definitions[definitionName];
         var configuration = configurations[definitionName];
 
@@ -163,15 +146,16 @@ var check = function(definitions, configurations) {
       });
 
       Promise.all(promises).then(function(results) {
+        console.log('resovle constraints');
         resolve(results);
-      }, function(results) {
+      }, function(result) {
         // only return errors to caller
-        console.log('reject because of constraints');
-        reject(results);
+        console.log('reject constraints');
+        reject(result);
       });
     }, function(results) {
       // only return errors to caller
-      console.log('reject because of required');
+      console.log('reject required');
       reject(results);
     });
   });

@@ -2,36 +2,31 @@ var util = require('util');
 var should = require('should');
 var check = require('../index').check;
 
-var types = {
-  string: "string",
-  number: 100,
-  boolean: true,
-  object: {
-    propString: "string",
-    propNumber: 100,
-    propBoolean: true
-  },
-  array: [
-    {
-      propString: "string",
-      propNumber: 100,
-      propBoolean: true
-    },
-    {
-      propString: "string",
-      propNumber: 100,
-      propBoolean: true
-    }
-  ]  
-};
+describe('constraints.js required', function() {
+  it('should resolve when all required property were present', function(done) {
+    var definitions = {
+      A: {
+        required: true,
+        constraints: {
+        }
+      },
+      B: {
+        required: true,
+        constraints: {
+        }
+      }
+    };
+    var configurations = {
+      A: 100,
+      B: 100
+    };
 
-var definitions = {
-};
+    check(definitions, configurations).then(function(results) {
+      done();
+    }, function(result) {
+    });
+  });
 
-var configurations = {
-};
-
-describe('constraints.js', function() {
   it('should reject when required property is undefined', function(done) {
     var definitions = {
       A: {
@@ -45,11 +40,11 @@ describe('constraints.js', function() {
         }
       }
     };
-    var configurationsA = {
+    var configurations = {
       B: 100
     };
 
-    check(definitions, configurationsA).then(function(results) {
+    check(definitions, configurations).then(function(results) {
     }, function(result) {
       result.should.be.an.Error;
       result.message.should.be.a.String;
@@ -71,12 +66,12 @@ describe('constraints.js', function() {
         }
       }
     };
-    var configurationsA = {
+    var configurations = {
       A: null,
       B: 100
     };
 
-    check(definitions, configurationsA).then(function(results) {
+    check(definitions, configurations).then(function(results) {
     }, function(result) {
       result.should.be.an.Error;
       result.message.should.be.a.String;
@@ -98,12 +93,12 @@ describe('constraints.js', function() {
         }
       }
     };
-    var configurationsA = {
+    var configurations = {
       A: null,
       B: null 
     };
 
-    check(definitions, configurationsA).then(function(results) {
+    check(definitions, configurations).then(function(results) {
     }, function(result) {
       result.should.be.an.Error;
       result.message.should.be.a.String;
