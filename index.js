@@ -11,7 +11,7 @@ var typeCheckers = {
 };
 
 var checkType = function(definitionName, configuration, constraint) {
-  console.log('check type', arguments);
+  console.log('check type', definitionName, configuration, constraint);
   return new Promise(function(resolve, reject) {
     if(typeCheckers[constraint](configuration)) {
       resolve(true);
@@ -22,7 +22,7 @@ var checkType = function(definitionName, configuration, constraint) {
 }
 
 var checkMin = function(definitionName, configuation, constraint) {
-  console.log("check min: ", arguments);
+  console.log("check min: ", definitionName, configuration, constraint);
   if(!util.isNumber(constraint)) {
     return Promise.reject(new Error("constrainturation of min constraint must be number"));
   }
@@ -40,7 +40,7 @@ var checkMin = function(definitionName, configuation, constraint) {
 };
 
 var checkMax = function(definitionName, configuation, constraint) {
-  console.log("check max: ", arguments);
+  console.log("check max: ", definitionName, configuration, constraint);
   if(!util.isNumber(constraint)) {
     return Promise.reject(new Error("constrainturation of min constraint must be number"));
   }
@@ -58,7 +58,7 @@ var checkMax = function(definitionName, configuation, constraint) {
 };
 
 var checkProperties = function(definitionName, configuation, constraint) {
-  console.log("check properties: ", arguments);
+  console.log("check properties: ", definitionName, configuration, constraint);
   if(!util.isObject(constraint)) {
     Promise.reject(new Error("constrainturation of properties constraint must be number"));
   }
@@ -99,24 +99,24 @@ var constraintCheckers = {
   }
 };
 
-var checkRequired = function(definitonName, configuation, definition) {
-  console.log("check required: ", arguments);
+var checkRequired = function(definitionName, definition, configuration) {
+  console.log("check required: ", definitionName, definition, configuration);
   if(!util.isBoolean(definition.required)) {
     return Promise.reject(new Error("required constraint of " +
                                      definitionName +
                                     " must be boolean"));
   }
 
-  if(definition.required === true && utils.isNullOrUndefined(configuation)) {
-    return Promise.reject(new Error("missing configuration of" +
+  if(definition.required === true && util.isNullOrUndefined(configuration)) {
+    return Promise.reject(new Error("missing configuration of " +
                                      definitionName));
   } else {
-    return Promise.resovle(true);
+    return Promise.resolve(true);
   }
 };
 
 var checkConstraints = function(definitionName, definition, configuration) {
-  console.log('check constraints', arguments);
+  console.log('check constraints', definitionName, definition, configuration);
   var constraints = definition.constraints;
 
   return new Promise(function(resolve, reject) {
@@ -136,8 +136,14 @@ var checkConstraints = function(definitionName, definition, configuration) {
 };
 
 var check = function(definitions, configurations) {
-  console.log('check', arguments);
-  var definitionNames = Object.keys(definitions);
+  console.log('check', definitions, configurations);
+  var definitionNames = Object.keys(definitions).filter(function(definitionName) {
+        // no need to check empty configuration which is also unrequired
+        var definition = definitions[definitionName];
+        var configuration = configurations[definitionName];
+
+        return definition.required || configuration;
+ });
 
   return new Promise(function(resolve, reject) {
     // check type first
@@ -160,12 +166,12 @@ var check = function(definitions, configurations) {
         resolve(results);
       }, function(results) {
         // only return errors to caller
-        reject(results.filter(function(result) {
-          return util.isError(result)
-        }));
+        console.log('reject because of constraints');
+        reject(results);
       });
     }, function(results) {
       // only return errors to caller
+      console.log('reject because of required');
       reject(results);
     });
   });
