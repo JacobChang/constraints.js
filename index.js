@@ -25,7 +25,7 @@ var checkType = function(definitionName, configuration, constraint) {
 var checkRange = function(definitionName, configuration, constraint) {
   console.log("check range: ", definitionName, configuration, constraint);
   if(!util.isObject(constraint)) {
-    return Promise.reject(new Error("constrainturation of min constraint must be number"));
+    return Promise.reject(new Error("constraint of min constraint must be number"));
   }
 
   if(!util.isString(configuration) && !util.isNumber(configuration)) {
@@ -42,10 +42,23 @@ var checkRange = function(definitionName, configuration, constraint) {
   }
 };
 
+var checkOptions = function(definitionName, configuration, constraint) {
+  console.log("check properties: ", definitionName, configuration, constraint);
+  if(!util.isArray(constraint)) {
+    Promise.reject(new Error("constraint of option constraint must be array"));
+  }
+
+  if(constraint.indexOf(configuration) !== -1) {
+    return Promise.resolve(true);
+  } else {
+    return Promise.reject(new Error(definitionName + ' must be element of array: ' + constraint));
+  }
+}
+
 var checkProperties = function(definitionName, configuration, constraint) {
   console.log("check properties: ", definitionName, configuration, constraint);
   if(!util.isObject(constraint)) {
-    Promise.reject(new Error("constrainturation of properties constraint must be number"));
+    Promise.reject(new Error("constraint of properties constraint must be number"));
   }
 
   if(!util.isObject(configuration) && !util.isObject(configuration)) {
@@ -75,6 +88,9 @@ var constraintCheckers = {
   },
   range: {
     check: checkRange,
+  },
+  options: {
+    check: checkOptions,
   },
   properties: {
     check: checkProperties,
