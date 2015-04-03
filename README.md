@@ -27,6 +27,15 @@ var definitions = {
         }
       }
     },
+    friends: {
+      required: true,
+      constraints: {
+        type: "array",
+        members: {
+          type: "string"
+        }
+      }
+    },
     address: {
       required: true,
       constraints: {
@@ -87,4 +96,5 @@ check(definitions, invalid).then(function() {
 ## Support Constraints
 type: "string", "number", "object", "array", "date"
 range: min, max
+members: member of array
 properties: nested
