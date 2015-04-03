@@ -7,30 +7,21 @@ describe('constraints.js properties', function() {
     A: {
       required: true,
       constraints: {
-        properties: {
-          min: {
-            required: false,
-            constraints: {
-              type: "number"
-            }
-          },
-          max: {
-            required: true,
-            constraints: {
-              type: "number"
-            }
+        type: "array",
+        members: {
+          type: "string",
+          range: {
+            min: 5,
+            max: 10
           }
         }
       }
     }
   };
 
-  it('should resovle when properties of object are valid', function(done) {
+  it('should resovle when properties of array are valid', function(done) {
     var configurations = {
-      A: {
-        min: 100,
-        max: 100
-      }
+      A: [ 'aaaaaaaa', 'aaaaaaaa' ]
     };
 
     check(definitions, configurations).then(function() {
@@ -40,19 +31,17 @@ describe('constraints.js properties', function() {
     });
   });
 
-  it('should reject when properties are invalid type', function(done) {
+  it('should reject when array are invalid', function(done) {
     var configurations = {
-      A: {
-        min: "100",
-        max: 100
-      }
+      A: [ 100, 100]
     };
 
     check(definitions, configurations).then(function() {
     }, function(result) {
+      console.log(result.message);
       result.should.be.an.Error;
       result.message.should.be.a.String;
-      result.message.should.be.exactly('wrong type of min: expect number');
+      result.message.should.be.exactly('wrong type of A[0]: expect string');
       done();
     });
   });

@@ -61,26 +61,38 @@ var checkProperties = function(definitionName, configuration, constraint) {
     Promise.reject(new Error("constraint of properties constraint must be number"));
   }
 
-  if(!util.isObject(configuration) && !util.isObject(configuration)) {
-    Promise.reject(new Error("configuration must be object or array when apply properties constraints"));
+  if(!util.isObject(configuration)) {
+    Promise.reject(new Error("configuration must be object when apply properties constraints"));
   }
 
-  if(util.isArray(configuration)) {
-    return new Promise(function(resolve, reject) {
-      var promises = configuration.map(function(member, i) {
-        return check(constraint, member);
-      });
+  return check(constraint, configuration);
+}
 
-      Promise.all(promises).then(function(results) {
-        resolve();
-      }, function(results) {
-        reject(results);
-      });
+var checkMembers = function(definitionName, configuration, constraint) {
+  console.log("check properties: ", definitionName, configuration, constraint);
+  if(!util.isObject(constraint)) {
+    Promise.reject(new Error("constraint of properties constraint must be number"));
+  }
+
+  if(!util.isArray(configuration)) {
+    Promise.reject(new Error("configuration must be array when apply members constraints"));
+  }
+
+  return new Promise(function(resolve, reject) {
+    var promises = configuration.map(function(member, index) {
+      return checkConstraints(definitionName + '[' + index + ']', {
+        required: true,
+        constraints: constraint
+      }, member);
     });
-  } else {
-    return check(constraint, configuration);
-  }
-};
+
+    Promise.all(promises).then(function(results) {
+      resolve();
+    }, function(results) {
+      reject(results);
+    });
+  });
+}
 
 var constraintCheckers = {
   type: {
@@ -91,6 +103,9 @@ var constraintCheckers = {
   },
   options: {
     check: checkOptions,
+  },
+  members: {
+    check: checkMembers
   },
   properties: {
     check: checkProperties,
